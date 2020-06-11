@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netbackup-cert-pod  
+  labels:
+    name: netbackup-cert-pod
+spec:
+  hostname: nb-client-cert
+  hostAliases:
+  - ip: "192.168.10.235"
+    hostnames:
+    - "uws-master"
+  nodeSelector:
+    kubernetes.io/hostname: docker3 
+  containers:
+    - name: netbackup-client-pod
+      image: store/veritasnetbackup/client:8.1.2 
+      command: ["/entrypoint.sh"]
+      args: ["-M", "uws-master", "-c", "nb-client-cert"]
+      ports:
+        - name: pbx 
+          containerPort: 1556
+        - name: vnetd 
+          containerPort: 13724
+      volumeMounts:
+        - name: backup-vol
+          mountPath: /mnt
+        - name: client-secret-volume
+          mountPath: "/etc/nb-secret-vol" 
+  volumes:
+    - name: backup-vol
+      persistentVolumeClaim:
+        claimName: backup-cert-pv-claim
+    - name: client-secret-volume
+      secret:
+        secretName: rsa-token-key
+        
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backup-cert-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/cert"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-cert-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi

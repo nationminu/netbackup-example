@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: externalip-svc
+  labels:
+    app: netbackup-externalip
+spec:
+  externalIPs:
+  - 192.168.10.193
+  ports:
+    - port: 80
+      name: http
+    - port: 1556
+      name: pbx
+    - port: 13724
+      name: vnetd
+  selector:
+    app: application-nb-pod 

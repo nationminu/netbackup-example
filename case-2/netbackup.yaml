@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netbackup-client-pod  
+  labels:
+    name: netbackup-client-pod
+spec:
+  hostname: nb-client
+  containers:
+    - name: netbackup-client-pod
+      image: store/veritasnetbackup/client:8.1.2 
+      command: ["/entrypoint.sh"]
+      args: ["-M", "uws-master", "-c", "nb-client"]
+      ports:
+        - name: pbx 
+          containerPort: 1556
+        - name: vnetd 
+          containerPort: 13724
+      volumeMounts:
+        - name: backup-vol
+          mountPath: /mnt 
+        - name: application1-vol
+          mountPath: /backup/application1 
+        - name: application2-vol
+          mountPath: /backup/application2
+        - name: application3-vol
+          mountPath: /backup/application3
+  volumes:
+    - name: backup-vol
+      persistentVolumeClaim:
+        claimName: backup-2-pv-claim
+    - name: application1-vol
+      persistentVolumeClaim:
+        claimName: application-1-pv-claim
+    - name: application2-vol
+      persistentVolumeClaim:
+        claimName: application-2-pv-claim
+    - name: application3-vol
+      persistentVolumeClaim:
+        claimName: application-3-pv-claim
+        
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backup-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/netbackup"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-2-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi 

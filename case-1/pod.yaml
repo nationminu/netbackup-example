@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: application-nb-pod
+  labels:
+    app: application-nb-pod
+spec:
+  hostname: netbackup-pod
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: application-vol
+      ports:
+        - name: http
+          containerPort: 80
+    - name: netbackup-client-pod
+      image: store/veritasnetbackup/client:8.1.2 
+      command: ["/entrypoint.sh"]
+      args: ["-M", "uws-master", "-c", "netbackup-pod"]
+      ports:
+        - name: pbx 
+          containerPort: 1556
+        - name: vnetd 
+          containerPort: 13724
+      volumeMounts:
+        - name: application-vol
+          mountPath: /application    
+        - name: backup-vol
+          mountPath: /backup         
+  volumes:
+    - name: backup-vol
+      persistentVolumeClaim:
+        claimName: netbackup-pv-claim
+    - name: application-vol
+      persistentVolumeClaim:
+        claimName: application-pv-claim

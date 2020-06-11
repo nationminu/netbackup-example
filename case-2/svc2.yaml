@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: case-2-test-svc
+  labels:
+    app: netbackup-externalip
+spec:
+  externalIPs:
+  - 192.168.10.236
+  ports:
+    - port: 1556
+      name: pbx
+    - port: 13724
+      name: vnetd
+  selector:
+    name: netbackup-client-pod

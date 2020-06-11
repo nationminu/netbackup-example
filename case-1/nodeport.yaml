@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbackup-nodeport-svc
+  labels:
+    name: netbackup-nodeport
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 30080
+      name: http
+    - port: 1556
+      nodePort: 31556
+      name: pbx
+    - port: 13724
+      nodePort: 32556
+      name: vnetd
+  selector:
+    app: application-nb-pod
+

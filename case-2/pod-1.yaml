@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-v1 
+spec:
+  containers:
+    - name: application-v1
+      image: nginx
+      volumeMounts:
+      - mountPath: "/usr/share/nginx/html"
+        name: application-vol
+  volumes:
+    - name: application-vol
+      persistentVolumeClaim:
+        claimName: application-1-pv-claim
+        
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: application-1-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/application1"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: application-1-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi 
